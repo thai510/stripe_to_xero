@@ -26,7 +26,7 @@ end
 output_file << ".csv"
 puts "Will be exporting to #{output_file}.\n\n"
 
-start_date = Time.at(Time.now.to_i - (TIME_INTERVAL * 3600 * 24))
+start_date = Time.at(Time.now.to_i - ((ARGV[0] || TIME_INTERVAL).to_i * 3600 * 24))
 puts "Gathering charges that happened since #{start_date.strftime("%m-%d-%Y")}:"
 
 # get all the charges
@@ -40,15 +40,16 @@ begin
     all_charges.data.each do |c|
       charges.push c
     end
-
     offset += COUNT
-    sleep WAITING_INTERVAL
-    print "Pulling charge chunk #{offset + 1}-#{offset + COUNT}..."
-    all_charges = Stripe::Charge.all(offset: offset, count: COUNT, :expand => ['data.customer'], :created => {:gte => start_date.to_i})
-    puts "OK.\n\n"
+    if offset <= all_charges.count
+      sleep WAITING_INTERVAL
+      print "Pulling charge chunk #{offset + 1}-#{offset + COUNT}..."
+      all_charges = Stripe::Charge.all(offset: offset, count: COUNT, :expand => ['data.customer'], :created => {:gte => start_date.to_i})
+      puts "OK.\n\n"
+    end
   end
-rescue
-  puts "There was an error connecting to stripe. Please ensure that you've entered the correct secret key."
+rescue Stripe::StripeError => e
+  puts "There was an error connecting to stripe. Please ensure that you've entered the correct secret key. Error: #{e.message}"
   exit
 end
 print "Finished gathering #{charges.count} charges.\n\n"
@@ -66,31 +67,35 @@ def xero_date(date_obj)
   if !date_obj.respond_to? :year
     date_obj = Time.at date_obj
   end
-  date = "#{date_obj.year}-#{"%02d" % date_obj.month}-#{"%02d" % date_obj.day}"
+  date = "#{"%02d" % date_obj.month}/#{"%02d" % date_obj.day}/#{date_obj.year}"
 end
 
 puts "Writing #{output_file}:"
 
 CSV.open(output_file, 'wb', row_sep: "\r\n") do |csv|
-  csv << ['Transaction Date','Description', 'Transaction Amount', 'Reference', 'Transaction Type', 'Payee']
+  csv << ['ContactName','EmailAddress', 'POCountry', 'InvoiceNumber', 'InvoiceDate', 'Description', 'Quantity', 'UnitAmount']
   charges.each do |charge|
     if charge.paid && !charge.refunded
+      contact_name = charge.customer.id
+      email = charge.customer.email if charge.customer.respond_to? :email
+      if charge.customer and charge.customer.cards and charge.customer.cards.count > 0
+        country = charge.customer.cards.data.last.country
+      end
       date = xero_date charge.created
       #
       #NOTE: RepairTech uses the description field to ascertain which product the charge is for, please adjust
       #      this accordingly for your needs.
       #
-      if charge.description.nil? or charge.description == ""
+      if charge.description.nil? or charge.description == "" or charge.description = "new subscription"
         description = "TechSuite"
       else
         description = "ROB"
       end
       amount = cents_to_dollars charge.amount - charge.amount_refunded
       reference = charge.id
-      type = "Credit"
-      payee = charge.customer.email if charge.customer.respond_to? :email
+      quantity = 1
 
-      csv << [date,description,amount,reference,type,payee] if payee
+      csv << [contact_name,email,country,reference,date,description,quantity,amount] if contact_name
     end
   end
 end
