@@ -4,7 +4,7 @@ require 'csv'
 require 'date'
 require 'stripe'
 
-load 'header.rb'
+require_relative './header.rb'
 
 Stripe.api_key = STRIPE_SECRET
 puts "==========================================="
