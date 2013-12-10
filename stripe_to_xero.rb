@@ -73,11 +73,13 @@ end
 puts "Writing #{output_file}:"
 
 CSV.open(output_file, 'wb', row_sep: "\r\n") do |csv|
-  csv << ['ContactName','EmailAddress', 'POCountry', 'InvoiceNumber', 'InvoiceDate', 'Description', 'Quantity', 'UnitAmount']
+  csv << ['ContactName','EmailAddress', 'POCountry', 'InvoiceNumber', 'InvoiceDate', 'Description', 'Quantity', 'UnitAmount', 'Reference']
   charges.each do |charge|
     if charge.paid
-      contact_name = charge.customer
-      email = charge.customer.email if charge.customer.respond_to? :email
+      contact_name = (charge.customer ? charge.customer.id : 'removed')
+      if charge.customer
+        email = charge.customer.email if charge.customer.respond_to? :email
+      end
       if charge.customer and charge.customer.cards and charge.customer.cards.count > 0
         country = charge.customer.cards.data.last.country
       end
@@ -92,10 +94,14 @@ CSV.open(output_file, 'wb', row_sep: "\r\n") do |csv|
         description = "ROB"
       end
       amount = cents_to_dollars charge.amount - charge.amount_refunded
-      reference = charge.id
+      reference = charge.customer.email || charge.id
+      discount = 'none'
+      if charge.customer and charge.customer.discount
+        discount = charge.customer.discount.coupon.id
+      end
       quantity = 1
 
-      csv << [contact_name,email,country,reference,date,description,quantity,amount] if contact_name
+      csv << [contact_name,email,country,reference,date,description,quantity,amount,discount] if contact_name
     end
   end
 end
