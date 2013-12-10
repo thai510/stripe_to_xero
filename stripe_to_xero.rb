@@ -67,7 +67,7 @@ def xero_date(date_obj)
   if !date_obj.respond_to? :year
     date_obj = Time.at date_obj
   end
-  date = "#{"%02d" % date_obj.month}/#{"%02d" % date_obj.day}/#{date_obj.year}"
+  return "#{"%02d" % date_obj.month}/#{"%02d" % date_obj.day}/#{date_obj.year}"
 end
 
 puts "Writing #{output_file}:"
@@ -76,7 +76,7 @@ CSV.open(output_file, 'wb', row_sep: "\r\n") do |csv|
   csv << ['ContactName','EmailAddress', 'POCountry', 'InvoiceNumber', 'InvoiceDate', 'Description', 'Quantity', 'UnitAmount']
   charges.each do |charge|
     if charge.paid
-      contact_name = charge.customer.id
+      contact_name = charge.customer
       email = charge.customer.email if charge.customer.respond_to? :email
       if charge.customer and charge.customer.cards and charge.customer.cards.count > 0
         country = charge.customer.cards.data.last.country
