@@ -19,9 +19,12 @@ There are variables located in header.rb that you will need to modify to make th
 # Usage
 
 Once you enter your information, you can run the script by doing the following:
+
 ruby stripe_to_xero.rb
 
 This will generate the CSV file.
+
+NOTE: You can also pass the ruby file an integer as the first argument that will override TIME_INTERVAL. For example, you could run `ruby stripe_to_xero.rb 7` to set TIME_INTERVAL to 7.
 
 # Notes
 
