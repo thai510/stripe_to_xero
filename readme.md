@@ -1,44 +1,33 @@
-This is a script for porting all the Stripe data you care about into Xero as a bank statement, which means you can easily reconcile invoices, bank transfers, fees, etc. The script pulls directly from your Stripe account, with no messy intermediate steps.
+This is a script forked from vidpresso/stripe_to_xero that is meant to pull all charges from stripe from a given time period and generate a CSV file that you
+can import directly into your Xero Sales section. You can automate this very easily with rake tasks or cronjobs. At RepairTech, we use this script to
+automate our accounting process.
+
+# Purpose
+At RepairTech, we believe that by automating mundane and low-level processes, we can enable people to focus on more important tasks that actually require their attention. We use both Stripe and Xero, and found that we were spending a lot of time doing data, entry, and decided to automate the process. We use this script within our rails application. Using the scheduler gem and a simple mailer we run this script once per week, and email our CFO the CSV file. He then imports it into Xero.
+This saves him tons of time. We made it open-source so you could save time too. You will need to modify some of the code for your needs.
 
 # Configuration
 
-## Configuration in Xero
-Create a `Stripe` bank account in Xero. It should be a manual account. Also, create a new `bot` user, who will handle uploading bank statements.
+## Header Variables
+There are variables located in header.rb that you will need to modify to make the ruby script work. There is a description for each variable in the header file. 
 
-## Environment Variables
-Use these environment variables as configuration
-    STRIPE_SECRET="api key from stripe"
-    XERO_USER="username for xero"
-    XERO_PASSWORD="password for xero"
-    XERO_ACCT_ID="account id from Xero"
-    BANK_NAME="the name of your transfer bank"
-    STX_COUNT=50 #optional, but recommended
-
-Be sure to `bundle install` to install the `stripe` gem. You should also install `casperjs` with `npm install -g casperjs` if you'd like to use the `auto_import.sh` script.
 
 # Dependencies
 
 - `stripe` gem
 
-# Recommended tools
-- `casperjs` npm module (`casper.coffee` automagically uploads the bank statement into Xero, even though Xero doesn't provide an API.)
-- `foreman` (recommended for easily running the script with environment variables)
-
 # Usage
 
-- Run `auto_import.sh` to automatically import your Stripe data into Xero. (If you have `casperjs` installed)
-- Or, just run the `stripe_to_xero.rb` script to generate `xero.csv` which you can upload manually.
-- Reconcile away.
+Once you enter your information, you can run the script by doing the following:
+ruby stripe_to_xero.rb
+
+This will generate the CSV file.
 
 # Notes
 
-We use `foreman` to easily set up environment variables. You might find it handy too.
+For more information about importing CSV files in stripe, see this URL: https://help.xero.com/us/#Accounts_InvoiceImport$BK_CSVCols
 
 Requires ruby 1.9.
-
-# Changelog
-
-v1 - Implements new refund calculation, adds better echoed text, uses Stripe's newish `expand` option to make 50 less API calls, and increase speed A LOT.
 
 # License
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 # how far back you want to look on stripe for data to include in the CSV
-TIME_INTERVAL = 1 #unit: days
+TIME_INTERVAL = 7 #unit: days
 # your secret stripe key
 STRIPE_SECRET = "your stripe key"
 # output file name (will automatically append .csv) to your value
