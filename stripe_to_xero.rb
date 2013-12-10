@@ -75,7 +75,7 @@ puts "Writing #{output_file}:"
 CSV.open(output_file, 'wb', row_sep: "\r\n") do |csv|
   csv << ['ContactName','EmailAddress', 'POCountry', 'InvoiceNumber', 'InvoiceDate', 'Description', 'Quantity', 'UnitAmount']
   charges.each do |charge|
-    if charge.paid && !charge.refunded
+    if charge.paid
       contact_name = charge.customer.id
       email = charge.customer.email if charge.customer.respond_to? :email
       if charge.customer and charge.customer.cards and charge.customer.cards.count > 0
