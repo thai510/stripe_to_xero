@@ -11,7 +11,7 @@ puts "==========================================="
 puts "Getting ready to run stripe => xero script."
 puts "===========================================\n\n"
 print "Checking for necessary variables..."
-[BANK_NAME, TIME_INTERVAL, STRIPE_SECRET, OUTPUT_FILE].each do |v|
+[TIME_INTERVAL, STRIPE_SECRET, OUTPUT_FILE].each do |v|
   if v.nil?
     puts "Please configure your variables in header.rb before running this script."
     exit
