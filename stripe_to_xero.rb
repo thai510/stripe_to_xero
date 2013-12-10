@@ -43,16 +43,15 @@ begin
 
     offset += COUNT
     sleep WAITING_INTERVAL
+    print "Pulling charge chunk #{offset + 1}-#{offset + COUNT}..."
     all_charges = Stripe::Charge.all(offset: offset, count: COUNT, :expand => ['data.customer'], :created => {:gte => start_date.to_i})
+    puts "OK.\n\n"
   end
 rescue
   puts "There was an error connecting to stripe. Please ensure that you've entered the correct secret key."
   exit
 end
 print "Finished gathering #{charges.count} charges.\n\n"
-puts "Gathering transfers that happened since #{start_date.strftime("%m-%d-%Y")}:"
-
-puts "done"
 
 def cents_to_dollars(value)
   if value != 0
@@ -77,6 +76,10 @@ CSV.open(output_file, 'wb', row_sep: "\r\n") do |csv|
   charges.each do |charge|
     if charge.paid && !charge.refunded
       date = xero_date charge.created
+      #
+      #NOTE: RepairTech uses the description field to ascertain which product the charge is for, please adjust
+      #      this accordingly for your needs.
+      #
       if charge.description.nil? or charge.description == ""
         description = "TechSuite"
       else
