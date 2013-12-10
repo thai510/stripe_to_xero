@@ -86,7 +86,6 @@ CSV.open(output_file, 'wb', row_sep: "\r\n") do |csv|
       #NOTE: RepairTech uses the description field to ascertain which product the charge is for, please adjust
       #      this accordingly for your needs.
       #
-      puts charge.description
       if charge.description.nil? or charge.description.empty?
         description = "TechSuite"
       else
