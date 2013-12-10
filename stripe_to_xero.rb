@@ -76,6 +76,7 @@ CSV.open(output_file, 'wb', row_sep: "\r\n") do |csv|
   csv << ['ContactName','EmailAddress', 'POCountry', 'InvoiceNumber', 'InvoiceDate', 'Description', 'Quantity', 'UnitAmount', 'Reference']
   charges.each do |charge|
     if charge.paid
+      paid_charges_count += 1
       contact_name = (charge.customer ? charge.customer.id : 'removed')
       if charge.customer
         email = charge.customer.email if charge.customer.respond_to? :email
@@ -105,4 +106,4 @@ CSV.open(output_file, 'wb', row_sep: "\r\n") do |csv|
     end
   end
 end
-puts "complete!"
+puts "Finished creating #{output_file} based on #{paid_charges_count} paid charges."
