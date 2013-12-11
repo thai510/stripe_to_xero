@@ -73,7 +73,7 @@ end
 puts "Writing #{output_file}:"
 
 CSV.open(output_file, 'wb', row_sep: "\r\n") do |csv|
-  csv << ['ContactName','EmailAddress', 'POCountry', 'InvoiceNumber', 'InvoiceDate', 'Description', 'Quantity', 'UnitAmount', 'Reference']
+  csv << ['ContactName','EmailAddress', 'POCountry', 'InvoiceNumber', 'InvoiceDate', 'Description', 'Quantity', 'UnitAmount', 'AccountCode','Reference']
   charges.each do |charge|
     if charge.paid
       paid_charges_count += 1
@@ -95,14 +95,14 @@ CSV.open(output_file, 'wb', row_sep: "\r\n") do |csv|
         description = "ROB"
       end
       amount = cents_to_dollars charge.amount - charge.amount_refunded
-      reference = charge.customer.email || charge.id
+      reference = charge.id
       discount = 'none'
       if charge.customer and charge.customer.discount
         discount = charge.customer.discount.coupon.id
       end
       quantity = 1
 
-      csv << [contact_name,email,country,reference,date,description,quantity,amount,discount] if contact_name
+      csv << [contact_name,email,country,reference,date,description,quantity,amount,ACCOUNT_CODE,discount] if contact_name
     end
   end
 end
